@@ -1,22 +1,13 @@
+import os
+import uvicorn
 from fastapi import FastAPI
-from presidio_analyzer import AnalyzerEngine
-from presidio_anonymizer import AnonymizerEngine
 
 app = FastAPI()
 
-# Initialize Presidio engines
-analyzer = AnalyzerEngine()
-anonymizer = AnonymizerEngine()
+@app.get("/")
+def read_root():
+    return {"message": "FastAPI is running on Render!"}
 
-@app.post("/anonymize/")
-async def anonymize_text(data: dict):
-    text = data.get("text", "")
-
-    # Step 1: Detect PII
-    pii_entities = analyzer.analyze(text=text, entities=None, language="en")
-
-    # Step 2: Anonymize detected PII
-    anonymized_text = anonymizer.anonymize(text=text, analyzer_results=pii_entities)
-
-    return {"original_text": text, "anonymized_text": anonymized_text.text}
-
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))  # Default port for Render
+    uvicorn.run(app, host="0.0.0.0", port=port)
